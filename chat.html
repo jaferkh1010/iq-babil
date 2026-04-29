@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دردشة الدعم العقاري</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chat-screen {
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .chat-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #e5ddd5; /* لون خلفية واتساب الشهير */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 15px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            font-weight: 500;
+        }
+        .received {
+            background: white;
+            align-self: flex-start;
+            border-bottom-right-radius: 2px;
+            color: #303030;
+        }
+        .sent {
+            background: #dcf8c6;
+            align-self: flex-end;
+            border-bottom-left-radius: 2px;
+            color: #303030;
+            text-align: right;
+        }
+        .input-area {
+            padding: 15px;
+            background: #f0f0f0;
+            display: flex;
+            gap: 10px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-weight: bold;
+        }
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body style="background: var(--light-green);">
+
+    <header>
+        <div style="font-size: 20px; font-weight: bold;">الموظف المناوب</div>
+        <a href="index.html" style="color:white; text-decoration: none;">إغلاق X</a>
+    </header>
+
+    <div class="chat-screen">
+        <div class="chat-header">قسم المبيعات والعمولات (1%)</div>
+        <div class="messages-area" id="chatBox">
+            <div class="bubble received">مرحباً بك في مكتبنا العقاري. هل تود عرض عقارك للبيع أم للإيجار؟</div>
+            <div class="bubble received" style="font-size: 12px; background: rgba(0,0,0,0.05);">يرجى ذكر المنطقة والمساحة والسعر المطلوب.</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userMsg" placeholder="اكتب رسالتك هنا...">
+            <button class="send-btn" onclick="send()">✈</button>
+        </div>
+    </div>
+
+    <script>
+        function send() {
+            const input = document.getElementById('userMsg');
+            const box = document.getElementById('chatBox');
+            if(!input.value.trim()) return;
+
+            // رسالة المستخدم
+            box.innerHTML += `<div class="bubble sent">${input.value}</div>`;
+            
+            const msg = input.value;
+            input.value = "";
+            box.scrollTop = box.scrollHeight;
+
+            // رد الموظف الآلي
+            setTimeout(() => {
+                box.innerHTML += `<div class="bubble received">تم استلام طلبك بخصوص "${msg}". سيقوم أحد موظفينا بالاتصال بك قريباً لترتيب زيارة ميدانية للعقار وتوقيع عقد العمولة.</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 1500);
+        }
+
+        // إرسال عند ضغط Enter
+        document.getElementById('userMsg').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') send();
+        });
+    </script>
+</body>
+</html>

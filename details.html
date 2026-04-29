@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تفاصيل العقار</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="propTitle">جاري التحميل...</h1>
+        <nav><a href="index.html">الرجوع للرئيسية</a></nav>
+    </header>
+
+    <main class="details-container">
+        <img id="propImage" src="" alt="" style="max-width: 100%; border-radius: 10px;">
+        <h2 id="propPrice"></h2>
+        <p id="propDesc">هذا العقار يتميز بموقع استراتيجي...</p>
+        
+        <div class="contact-box">
+            <button onclick="alert('اتصل على: 07800000000')">اتصل بالسمسار</button>
+        </div>
+    </main>
+
+    <script>
+        // كود لجلب بيانات العقار المحدد من الـ LocalStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const propIndex = urlParams.get('id');
+        const properties = JSON.parse(localStorage.getItem('myProperties')) || [];
+        const property = properties[propIndex];
+
+        if(property) {
+            document.getElementById('propTitle').innerText = property.title;
+            document.getElementById('propPrice').innerText = "السعر: $" + property.price;
+            document.getElementById('propImage').src = property.image;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>IQ Babil For Property</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">IQ Babil For Property</div>
+    <div id="authSection"></div>
+</header>
+
+<section class="hero">
+    <h1>ابحث بذكاء في عقارات بابل</h1>
+    <div style="background:white; width: 85%; max-width: 700px; display: flex; padding: 5px; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+        <input type="text" id="aiQuery" placeholder="مثلاً: بيت طابقين بالحلة بحدود 150 مليون..." style="flex:1; border:none; padding:15px 25px; outline:none; border-radius: 50px; font-size:16px;">
+        <button onclick="askAI()" class="btn-main" style="border-radius: 50px; background:var(--gold); border:none; padding:0 25px; color:white; cursor:pointer; font-weight:bold;">بحث ذكي 🤖</button>
+    </div>
+</section>
+
+<main class="grid" id="mainGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:25px; padding:50px 5%;"></main>
+
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img id="modalImg" style="width:100%; height:300px; object-fit:cover;">
+        <div style="padding: 25px;">
+            <h2 id="modalTitle" style="color:var(--primary); margin:0;"></h2>
+            <p id="modalLoc" style="color:var(--gold); font-weight:bold; margin:10px 0;"></p>
+            <p id="modalDesc" style="line-height:1.6; color:#555; background:#f9f9f9; padding:15px; border-radius:10px;"></p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                <span id="modalPrice" style="font-size:26px; font-weight:bold; color:var(--primary);"></span>
+                <button onclick="startChat()" class="btn-main" style="background:var(--gold); padding:12px 25px;">تواصل الآن 💬</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCTehQky9-w6mcAEV0gRnCDOdGrZ80CwcA",
+        authDomain: "iq-babil.firebaseapp.com",
+        databaseURL: "https://iq-babil-default-rtdb.firebaseio.com/",
+        projectId: "iq-babil",
+        storageBucket: "iq-babil.firebasestorage.app",
+        appId: "1:426646652255:web:1c6b275301a8a15e54a2ea"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let allProperties = [];
+
+    // جلب البيانات من فايربيس
+    onValue(ref(db, 'properties'), (snapshot) => {
+        const data = snapshot.val();
+        allProperties = data ? Object.values(data) : [];
+        render(allProperties);
+    });
+
+    window.render = (props) => {
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = props.length ? "" : "<h3 style='grid-column:1/-1; text-align:center;'>لا توجد عقارات حالياً</h3>";
+        props.forEach((p, i) => {
+            grid.innerHTML += `
+                <div class="card" onclick="openDetails(${i})">
+                    <img src="${p.img}">
+                    <div class="card-content">
+                        <span style="font-size:12px; color:var(--gold);">📍 ${p.prov} - ${p.dist}</span>
+                        <h3 style="margin:5px 0;">${p.title}</h3>
+                        <p style="color:var(--primary); font-weight:bold; font-size:20px;">$${Number(p.price).toLocaleString()}</p>
+                    </div>
+                </div>`;
+        });
+    };
+
+    window.openDetails = (i) => {
+        const p = allProperties[i];
+        document.getElementById('modalImg').src = p.img;
+        document.getElementById('modalTitle').innerText = p.title;
+        document.getElementById('modalLoc').innerText = "📍 " + p.prov + " - " + p.dist;
+        document.getElementById('modalDesc').innerText = p.details || "لا توجد تفاصيل إضافية.";
+        document.getElementById('modalPrice').innerText = "$" + Number(p.price).toLocaleString();
+        document.getElementById('detailsModal').style.display = "block";
+    };
+</script>
+
+<script>
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const authBox = document.getElementById('authSection');
+    if(user) {
+        authBox.innerHTML = `أهلاً ${user.name} ${user.role==='admin'?' | <a href="add.html" style="color:var(--primary); font-weight:bold; text-decoration:none;">+ إضافة</a>':''} | <button onclick="localStorage.removeItem('currentUser'); location.reload();" style="border:none; background:none; color:red; cursor:pointer;">خروج</button>`;
+    } else {
+        authBox.innerHTML = `<button onclick="location.href='login.html'" class="btn-main">دخول</button>`;
+    }
+
+    function closeModal() { document.getElementById('detailsModal').style.display = "none"; }
+    function startChat() {
+        if(!user) { alert("سجل دخولك أولاً للاستفسار!"); location.href='login.html'; }
+        else { alert("سيتم فتح الدردشة فوراً!"); }
+    }
+    
+    // دالة AI (Gemini)
+    async function askAI() {
+        const q = document.getElementById('aiQuery').value;
+        if(!q) return;
+        const prompt = `حلل واستخرج (المحافظة، السعر الأقصى) بصيغة JSON فقط: "${q}"`;
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBfBCioj73iKw9Gxfxm0m4gqx-VgVM7gaU`, {
+            method: "POST", headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const result = await resp.json();
+        const filters = JSON.parse(result.candidates[0].content.parts[0].text.match(/\{.*\}/s)[0]);
+        const filtered = allProperties.filter(p => {
+            return (!filters.المحافظة || p.prov.includes(filters.المحافظة)) &&
+                   (!filters["السعر الأقصى"] || Number(p.price) <= filters["السعر الأقصى"]);
+        });
+        render(filtered);
+    }
+</script>
+</body>
+</html>

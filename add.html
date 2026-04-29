@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نشر عقار - IQ Babil</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="background:#e8f5e9; padding:30px;">
+
+<div style="max-width:550px; margin:0 auto; background:white; padding:30px; border-radius:25px; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+    <h2 style="color:var(--primary); text-align:center;">إضافة عقار للسحاب ☁️</h2>
+    <form id="addForm">
+        <input type="text" id="title" placeholder="عنوان العقار" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #ddd;" required>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="prov" placeholder="المحافظة" style="flex:1; padding:12px; border-radius:10px; border:1px solid #ddd;">
+            <input type="text" id="dist" placeholder="المنطقة" style="flex:1; padding:12px; border-radius:10px; border:1px solid #ddd;">
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="number" id="price" placeholder="السعر $" style="flex:1; padding:12px; border-radius:10px; border:1px solid #ddd;">
+            <input type="tel" id="phone" placeholder="رقم الهاتف" style="flex:1; padding:12px; border-radius:10px; border:1px solid #ddd;">
+        </div>
+        <textarea id="details" placeholder="اكتب تفاصيل العقار..." style="width:100%; height:100px; padding:12px; border-radius:10px; border:1px solid #ddd; margin-bottom:15px;"></textarea>
+        <input type="file" id="imgFile" style="margin-bottom:20px;" required>
+        <button type="submit" id="submitBtn" class="btn-main" style="width:100%; padding:15px; font-size:18px;">نشر العقار الآن ✅</button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCTehQky9-w6mcAEV0gRnCDOdGrZ80CwcA",
+        authDomain: "iq-babil.firebaseapp.com",
+        databaseURL: "https://iq-babil-default-rtdb.firebaseio.com/",
+        projectId: "iq-babil",
+        appId: "1:426646652255:web:1c6b275301a8a15e54a2ea"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let b64 = "";
+    document.getElementById('imgFile').onchange = (e) => {
+        let r = new FileReader();
+        r.onload = (ev) => b64 = ev.target.result;
+        r.readAsDataURL(e.target.files[0]);
+    };
+
+    document.getElementById('addForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "جاري الرفع...";
+        btn.disabled = true;
+
+        await set(push(ref(db, 'properties')), {
+            title: document.getElementById('title').value,
+            prov: document.getElementById('prov').value,
+            dist: document.getElementById('dist').value,
+            price: document.getElementById('price').value,
+            phone: document.getElementById('phone').value,
+            details: document.getElementById('details').value,
+            img: b64
+        });
+        alert("تم الحفظ في فايربيس!");
+        window.location.href = "index.html";
+    };
+</script>
+</body>
+</html>

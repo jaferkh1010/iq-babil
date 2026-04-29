@@ -2,31 +2,36 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>دخول - سمسار</title>
+    <title>تسجيل الدخول | IQ Babil</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .login-card { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+    </style>
 </head>
-<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;">
-        <h2 style="color: var(--primary);">🏡 تسجيل الدخول</h2>
-        <form id="loginForm">
-            <input type="text" id="u" placeholder="اسم المستخدم" style="width:100%; padding:15px; margin:10px 0; border:1px solid #ddd; border-radius:10px;" required>
-            <input type="password" id="p" placeholder="كلمة المرور" style="width:100%; padding:15px; margin:10px 0; border:1px solid #ddd; border-radius:10px;" required>
-            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">دخول</button>
-        </form>
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-        <p>ليس لديك حساب؟</p>
-        <button onclick="alert('واجهة تسجيل حساب جديد ستتوفر قريباً')" class="btn btn-green" style="width: 100%;">تسجيل مستخدم جديد</button>
-    </div>
-    <script>
-        document.getElementById('loginForm').onsubmit = function(e) {
-            e.preventDefault();
-            const user = document.getElementById('u').value;
-            const pass = document.getElementById('p').value;
-            if((user==='admin'||user==='user') && pass==='123') {
-                localStorage.setItem('currentUser', JSON.stringify({role: user}));
-                window.location.href = 'index.html';
-            } else { alert('خطأ في البيانات'); }
-        };
-    </script>
+<body style="background: var(--light-bg);">
+
+<div class="login-card">
+    <h2 style="color: var(--primary);">تسجيل الدخول</h2>
+    <p style="color: #666; font-size: 14px;">أدخل اسمك للدخول إلى النظام</p>
+    <input type="text" id="userName" placeholder="الاسم الكامل" required>
+    <select id="userRole" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd;">
+        <option value="user">مستخدم (باحث عن عقار)</option>
+        <option value="admin">أدمن (صاحب عقارات)</option>
+    </select>
+    <button onclick="login()" class="btn-main" style="width: 100%; padding: 15px; margin-top: 20px; font-size: 16px;">دخول</button>
+</div>
+
+<script>
+    function login() {
+        const name = document.getElementById('userName').value;
+        const role = document.getElementById('userRole').value;
+        if (!name) return alert("يرجى إدخال الاسم");
+        
+        const userData = { name: name, role: role, id: "user_" + Date.now() };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        window.location.href = "index.html";
+    }
+</script>
 </body>
 </html>

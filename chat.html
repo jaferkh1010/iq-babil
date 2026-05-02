@@ -2,29 +2,34 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>الدردشة | IQ Babil</title>
+    <title>دردشة ذكية | IQ Babil</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .chat-container { max-width: 600px; margin: 20px auto; background: white; height: 80vh; display: flex; flex-direction: column; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f9f9f9; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 14px; }
-        .sent { align-self: flex-start; background: var(--primary); color: white; }
-        .received { align-self: flex-end; background: #e0e0e0; color: #333; }
-        .chat-input { display: flex; padding: 15px; border-top: 1px solid #eee; }
+        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f9f9f9; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 14px; position: relative; }
+        .sent { align-self: flex-start; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
+        .received { align-self: flex-end; background: #e0e0e0; color: #333; border-bottom-left-radius: 2px; }
+        .ai-msg { align-self: center; background: #fff3e0; border: 1px solid var(--gold); color: #856404; text-align: center; font-style: italic; width: 90%; }
+        .chat-input { display: flex; padding: 15px; border-top: 1px solid #eee; background: white; gap: 10px; }
+        .ai-btn { background: #673ab7; color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; transition: 0.3s; }
+        .ai-btn:hover { background: #512da8; transform: rotate(15deg); }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;">IQ Babil - الدردشة</div>
-    <div id="chatWith" style="font-weight: bold; color: var(--gold);"></div>
+    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;">IQ Babil Chat</div>
+    <div id="status" style="font-size: 12px; color: var(--gold);">🤖 المحلل الذكي نشط</div>
 </header>
 
 <div class="chat-container">
     <div id="messages"></div>
+    <div id="aiLoading" style="display:none; text-align:center; font-size:12px; color:var(--primary); padding:5px;">الذكاء الاصطناعي يحلل الرسائل...</div>
     <div class="chat-input">
-        <input type="text" id="msgInput" placeholder="اكتب رسالتك هنا..." style="flex:1; border:none; padding:10px; outline:none;">
-        <button id="sendBtn" class="btn-main">إرسال</button>
+        <button class="ai-btn" onclick="askAIChat()" title="اطلب نصيحة الذكاء">✨</button>
+        <input type="text" id="msgInput" placeholder="اكتب رسالتك..." style="flex:1; border: 1px solid #ddd; padding:10px; border-radius:25px; outline:none;">
+        <button id="sendBtn" class="btn-main" style="border-radius:25px;">إرسال</button>
     </div>
 </div>
 
@@ -46,24 +51,23 @@
     const params = new URLSearchParams(window.location.search);
     const propertyTitle = params.get('prop') || "عام";
 
-    document.getElementById('chatWith').innerText = "عقار: " + propertyTitle;
+    if(!user) { window.location.href="login.html"; }
 
-    if(!user) { alert("سجل دخولك أولاً!"); window.location.href="login.html"; }
-
-    // إرسال رسالة
-    document.getElementById('sendBtn').onclick = () => {
+    // إرسال رسالة عادية
+    document.getElementById('sendBtn').onclick = sendMessage;
+    function sendMessage() {
         const text = document.getElementById('msgInput').value;
         if(!text) return;
-        const msgRef = push(ref(db, 'chats/' + propertyTitle));
-        set(msgRef, {
+        push(ref(db, 'chats/' + propertyTitle), {
             sender: user.name,
             text: text,
+            type: 'user',
             time: Date.now()
         });
         document.getElementById('msgInput').value = "";
-    };
+    }
 
-    // استقبال الرسائل فوراً
+    // استماع للرسائل
     onValue(ref(db, 'chats/' + propertyTitle), (snapshot) => {
         const messagesDiv = document.getElementById('messages');
         messagesDiv.innerHTML = "";
@@ -71,11 +75,43 @@
         if(data) {
             Object.values(data).forEach(m => {
                 const isMe = m.sender === user.name;
-                messagesDiv.innerHTML += `<div class="msg ${isMe?'sent':'received'}"><strong>${m.sender}:</strong><br>${m.text}</div>`;
+                const className = m.type === 'ai' ? 'ai-msg' : (isMe ? 'sent' : 'received');
+                messagesDiv.innerHTML += `<div class="msg ${className}"><strong>${m.sender}:</strong><br>${m.text}</div>`;
             });
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
     });
+
+    // وظيفة الذكاء الاصطناعي داخل الجات
+    window.askAIChat = async () => {
+        const messagesDiv = document.getElementById('messages');
+        const lastMessages = Array.from(messagesDiv.querySelectorAll('.msg')).slice(-3).map(m => m.innerText).join(" | ");
+        
+        document.getElementById('aiLoading').style.display = "block";
+        
+        try {
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBfBCioj73iKw9Gxfxm0m4gqx-VgVM7gaU`, {
+                method: "POST", headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ contents: [{ parts: [{ text: `أنت وسيط عقاري ذكي في بابل. بناءً على آخر رسائل في المحادثة: "${lastMessages}"، قدم نصيحة مختصرة جداً (سطر واحد) بالعامية العراقية للمشتري أو البائع حول هذا العقار (${propertyTitle}).` }] }] })
+            });
+            
+            const result = await resp.json();
+            const aiAdvice = result.candidates[0].content.parts[0].text;
+
+            // حفظ نصيحة الذكاء في قاعدة البيانات ليراها الطرفان
+            push(ref(db, 'chats/' + propertyTitle), {
+                sender: "مساعد IQ Babil الذكي ✨",
+                text: aiAdvice,
+                type: 'ai',
+                time: Date.now()
+            });
+
+        } catch (e) {
+            console.error(e);
+        } finally {
+            document.getElementById('aiLoading').style.display = "none";
+        }
+    };
 </script>
 </body>
 </html>

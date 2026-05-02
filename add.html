@@ -2,47 +2,135 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إضافة عقار جديد | IQ Babil</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة عقار ذكي | IQ Babil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --main-grad: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            --bg: #f4f7f6;
+            --text: #2d3436;
+            --card: rgba(255, 255, 255, 0.95);
+            --input-bg: #fff;
+        }
+
+        /* تنسيقات الدارك مود */
+        body.dark-mode {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card: rgba(30, 30, 30, 0.95);
+            --input-bg: #2d2d2d;
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--bg);
+            background-image: linear-gradient(rgba(27, 94, 32, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(27, 94, 32, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            margin: 0; padding: 20px; color: var(--text);
+            transition: 0.3s;
+        }
+
+        .form-card {
+            background: var(--card);
+            padding: 30px; border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%; max-width: 600px; margin: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dark-toggle {
+            position: fixed; top: 20px; left: 20px;
+            width: 50px; height: 50px; border-radius: 15px;
+            background: var(--main-grad); color: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 1000;
+        }
+
+        input, select, textarea {
+            width: 100%; padding: 14px; margin: 10px 0;
+            border: 2px solid #ddd; border-radius: 15px;
+            font-family: 'Cairo'; box-sizing: border-box;
+            background: var(--input-bg); color: var(--text);
+            outline: none; transition: 0.3s;
+        }
+
+        input:focus { border-color: #2e7d32; }
+
+        .ai-gen-btn {
+            background: #0984e3; color: white; border: none;
+            padding: 8px 15px; border-radius: 10px; cursor: pointer;
+            font-size: 13px; margin-bottom: 5px; float: left;
+        }
+
+        .btn-save {
+            width: 100%; background: var(--main-grad); color: white;
+            border: none; padding: 15px; border-radius: 18px;
+            font-weight: 900; cursor: pointer; font-size: 18px; margin-top: 20px;
+        }
+
+        #preview { width: 100%; height: 200px; object-fit: cover; border-radius: 20px; display: none; margin: 10px 0; border: 3px solid #2e7d32; }
+        .row { display: flex; gap: 10px; }
+        label { font-weight: bold; font-size: 14px; }
+    </style>
 </head>
-<body style="background: var(--light-bg); padding: 40px 0;">
+<body>
 
-<div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-    <h2 style="color: var(--primary); text-align: center; margin-bottom: 30px;">نشر عقار جديد على السحاب ☁️</h2>
-    <form id="addForm">
-        <label>عنوان العقار</label>
-        <input type="text" id="title" placeholder="مثال: بيت حديث للبيع" style="width:100%; padding:12px; margin:10px 0 20px; border-radius:8px; border:1px solid #ddd;" required>
-        
-        <div style="display:flex; gap:15px;">
-            <div style="flex:1;">
-                <label>المحافظة</label>
-                <input type="text" id="prov" placeholder="بابل" style="width:100%; padding:12px; margin:10px 0 20px; border-radius:8px; border:1px solid #ddd;">
-            </div>
-            <div style="flex:1;">
-                <label>المنطقة</label>
-                <input type="text" id="dist" placeholder="الحلة" style="width:100%; padding:12px; margin:10px 0 20px; border-radius:8px; border:1px solid #ddd;">
-            </div>
-        </div>
+<div class="dark-toggle" onclick="document.body.classList.toggle('dark-mode')">
+    <i class="fas fa-moon"></i>
+</div>
 
-        <div style="display:flex; gap:15px;">
-            <div style="flex:1;">
-                <label>السعر ($)</label>
-                <input type="number" id="price" style="width:100%; padding:12px; margin:10px 0 20px; border-radius:8px; border:1px solid #ddd;">
-            </div>
-            <div style="flex:1;">
-                <label>رقم الهاتف</label>
-                <input type="tel" id="phone" style="width:100%; padding:12px; margin:10px 0 20px; border-radius:8px; border:1px solid #ddd;">
-            </div>
-        </div>
+<div class="form-card">
+    <h2 style="text-align: center; margin-top: 0;">🏠 نشر عقار جديد</h2>
+    
+    <input type="text" id="title" placeholder="عنوان العقار (مثلاً: بيت طابقين في المهناوية)">
+    
+    <div class="row">
+        <select id="type">
+            <option value="بيت">🏠 بيت</option>
+            <option value="شقة">🏢 شقة</option>
+            <option value="أرض">🌱 أرض</option>
+            <option value="محل">🏪 محل</option>
+        </select>
+        <select id="ownership">
+            <option value="طابو ملك">📜 طابو ملك</option>
+            <option value="زراعي">🚜 زراعي</option>
+            <option value="إقرار محكمة">⚖️ إقرار محكمة</option>
+        </select>
+    </div>
 
-        <label>التفاصيل</label>
-        <textarea id="details" rows="4" style="width:100%; padding:12px; margin:10px 0 20px; border-radius:8px; border:1px solid #ddd;"></textarea>
+    <select id="prov">
+        <option value="">📍 اختر المحافظة</option>
+        <option value="بغداد">بغداد</option><option value="بابل">بابل</option>
+        <option value="البصرة">البصرة</option><option value="نينوى">نينوى</option>
+        <option value="أربيل">أربيل</option><option value="النجف">النجف</option>
+        <option value="كربلاء">كربلاء</option><option value="كركوك">كركوك</option>
+        <option value="ذي قار">ذي قار</option><option value="ميسان">ميسان</option>
+        <option value="القادسية">القادسية</option><option value="المثنى">المثنى</option>
+        <option value="الأنبار">الأنبار</option><option value="واسط">واسط</option>
+        <option value="ديالى">ديالى</option><option value="السليمانية">السليمانية</option>
+        <option value="دهوك">دهوك</option><option value="صلاح الدين">صلاح الدين</option>
+    </select>
 
-        <label>صورة العقار</label>
-        <input type="file" id="imgFile" accept="image/*" style="margin:10px 0 30px;" required>
+    <div class="row">
+        <input type="number" id="price" placeholder="السعر (دينار)">
+        <input type="text" id="phone" placeholder="رقم الواتساب">
+    </div>
 
-        <button type="submit" id="subBtn" class="btn-main" style="width:100%; padding:15px; font-size:18px;">نشر العقار الآن ✅</button>
-    </form>
+    <div style="overflow: hidden;">
+        <label>الوصف التفصيلي:</label>
+        <button class="ai-gen-btn" onclick="generateAIDesc()">✨ وصف ذكي</button>
+        <textarea id="desc" placeholder="اكتب تفاصيل العقار أو استخدم الوصف الذكي..." rows="4"></textarea>
+    </div>
+    
+    <label>🖼️ صورة العقار:</label>
+    <input type="file" id="imgInput" accept="image/*">
+    <img id="preview">
+
+    <button class="btn-save" id="saveBtn">نشر في بوابة بابل 🚀</button>
+    <p id="status" style="text-align: center; font-weight: bold;"></p>
 </div>
 
 <script type="module">
@@ -59,38 +147,71 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    let base64Image = "";
 
-    let base64String = "";
-    document.getElementById('imgFile').onchange = (e) => {
+    // معاينة الصورة وتحويلها
+    document.getElementById('imgInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = (ev) => base64String = ev.target.result;
-        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            base64Image = reader.result;
+            const prev = document.getElementById('preview');
+            prev.src = base64Image; prev.style.display = 'block';
+        };
+        if(file) reader.readAsDataURL(file);
+    });
+
+    // دالة توليد الوصف بالذكاء الاصطناعي
+    window.generateAIDesc = async () => {
+        const title = document.getElementById('title').value;
+        const type = document.getElementById('type').value;
+        const prov = document.getElementById('prov').value;
+        const own = document.getElementById('ownership').value;
+
+        if(!title || !prov) return alert("اكتب العنوان والمحافظة أولاً!");
+
+        document.getElementById('desc').value = "جاري صياغة وصف احترافي... ⏳";
+        
+        try {
+            const res = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
+                headers: { "Authorization": "Bearer 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", "Content-Type": "application/json" },
+                method: "POST",
+                body: JSON.stringify({ 
+                    inputs: `اكتب وصفاً جذاباً لعقار في العراق: ${type} في ${prov}، العنوان: ${title}، نوع السند: ${own}. اجعل الوصف باللهجة العراقية وبصيغة تسويقية.`
+                }),
+            });
+            const data = await res.json();
+            const aiText = data[0].generated_text.split('\n').slice(1).join('\n').trim();
+            document.getElementById('desc').value = aiText || `عقار لقطة! ${type} في قلب ${prov}، سند ${own}، جاهز للسكن وبسعر مناسب جداً.`;
+        } catch {
+            document.getElementById('desc').value = `عقار مميز: ${type} في ${prov}، نوع السند ${own}. للمزيد من التفاصيل يرجى الاتصال.`;
+        }
     };
 
-    document.getElementById('addForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('subBtn');
-        btn.innerText = "جاري الحفظ بالسحاب...";
-        btn.disabled = true;
+    // حفظ البيانات
+    document.getElementById('saveBtn').onclick = async () => {
+        const status = document.getElementById('status');
+        const data = {
+            title: document.getElementById('title').value,
+            type: document.getElementById('type').value,
+            ownership: document.getElementById('ownership').value,
+            prov: document.getElementById('prov').value,
+            price: document.getElementById('price').value,
+            phone: document.getElementById('phone').value,
+            desc: document.getElementById('desc').value,
+            img: base64Image
+        };
 
+        if(!data.title || !data.price || !base64Image) return alert("جعفر، املي كل الحقول وحمل الصورة!");
+
+        status.innerText = "جاري النشر... ⏳";
         try {
-            const newRef = push(ref(db, 'properties'));
-            await set(newRef, {
-                title: document.getElementById('title').value,
-                prov: document.getElementById('prov').value,
-                dist: document.getElementById('dist').value,
-                price: document.getElementById('price').value,
-                phone: document.getElementById('phone').value,
-                details: document.getElementById('details').value,
-                img: base64String,
-                timestamp: Date.now()
-            });
-            alert("تم النشر بنجاح!");
-            window.location.href = "index.html";
-        } catch (err) {
-            alert("خطأ: " + err.message);
-            btn.disabled = false;
+            await set(push(ref(db, 'properties')), data);
+            status.style.color = "green";
+            status.innerText = "تم النشر بنجاح! 🎉";
+            setTimeout(() => window.location.href = "index.html", 1500);
+        } catch (e) {
+            status.innerText = "فشل النشر، حاول مرة ثانية.";
         }
     };
 </script>

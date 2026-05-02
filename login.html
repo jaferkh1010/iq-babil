@@ -2,36 +2,142 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول | IQ Babil</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .login-card { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        :root {
+            --main-grad: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            --glass: rgba(255, 255, 255, 0.9);
+            --primary: #1b5e20;
+            --shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f7f6;
+            background-image: 
+                linear-gradient(rgba(27, 94, 32, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(27, 94, 32, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .login-card {
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 35px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .login-card h2 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            font-family: 'Cairo';
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: var(--main-grad);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(27, 94, 32, 0.3);
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
     </style>
 </head>
-<body style="background: var(--light-bg);">
+<body>
 
 <div class="login-card">
-    <h2 style="color: var(--primary);">تسجيل الدخول</h2>
-    <p style="color: #666; font-size: 14px;">أدخل اسمك للدخول إلى النظام</p>
-    <input type="text" id="userName" placeholder="الاسم الكامل" required>
-    <select id="userRole" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd;">
-        <option value="user">مستخدم (باحث عن عقار)</option>
-        <option value="admin">أدمن (صاحب عقارات)</option>
-    </select>
-    <button onclick="login()" class="btn-main" style="width: 100%; padding: 15px; margin-top: 20px; font-size: 16px;">دخول</button>
+    <i class="fas fa-user-circle" style="font-size: 60px; color: var(--primary); margin-bottom: 15px;"></i>
+    <h2>دخول الأعضاء</h2>
+    
+    <div class="input-group">
+        <label><i class="fas fa-user"></i> اسم المستخدم</label>
+        <input type="text" id="username" placeholder="أدخل اسمك">
+    </div>
+
+    <div class="input-group">
+        <label><i class="fas fa-lock"></i> كلمة المرور</label>
+        <input type="password" id="password" placeholder="أدخل الرمز السري">
+    </div>
+
+    <button class="btn-login" onclick="handleLogin()">تسجيل الدخول</button>
+    
+    <a href="index.html" class="back-link">العودة للرئيسية</a>
 </div>
 
 <script>
-    function login() {
-        const name = document.getElementById('userName').value;
-        const role = document.getElementById('userRole').value;
-        if (!name) return alert("يرجى إدخال الاسم");
-        
-        const userData = { name: name, role: role, id: "user_" + Date.now() };
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        window.location.href = "index.html";
+    function handleLogin() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if(user && pass) {
+            // هنا تخزن الاسم حتى يظهر بالترحيب في الصفحة الرئيسية
+            localStorage.setItem('userName', user);
+            
+            // تحويل المستخدم للصفحة الرئيسية بعد النجاح
+            alert("تم تسجيل الدخول بنجاح! هلا بيك.");
+            window.location.href = "index.html";
+        } else {
+            alert("يابة املي الحقول أولاً!");
+        }
     }
 </script>
+
 </body>
 </html>
